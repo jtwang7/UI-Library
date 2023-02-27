@@ -17,7 +17,7 @@ const babelOptions = {
 };
 
 const options = {
-  input: "./index.ts",
+  input: "src/index.ts",
   output: [
     {
       file: packageJson.main,

@@ -18,9 +18,17 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "rootDir": ".",
+    "declaration": true,
+    "declarationDir": "./build/types"
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/**/*.stories.tsx",
+    "src/**/*.test.tsx"
   ]
 }
