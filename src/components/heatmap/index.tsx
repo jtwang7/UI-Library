@@ -2,25 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import * as PIXI from "pixi.js-legacy";
 import _ from "lodash";
 import colormap from "colormap";
-
-// Types
-type Options = {
-  cell: {
-    width: number;
-    height: number;
-  };
-  fontSize?: number;
-  needTopBar?: boolean;
-  needRightBar?: boolean;
-  needLegend?: boolean;
-  padding?: [number, number, number, number]; // [top, right, bottom, left]
-};
-type HeatmapProps = {
-  data: number[][];
-  xs?: string[];
-  ys?: string[];
-  options: Options;
-};
+import { HeatmapProps, Options } from "./types";
+import { DeepRequired } from "../../common";
 
 // Common Functions
 function getColorRangeIndex(
@@ -51,7 +34,28 @@ function createGradient(width: number, height: number, colors: string[]) {
 }
 
 export default function Heatmap(props: HeatmapProps) {
-  const { data, options, xs = [], ys = [] } = props;
+  const { data, xs = [], ys = [], options = {} } = props;
+
+  // default options
+  const defaultOptions: DeepRequired<Options> = useMemo(
+    () =>
+      _.defaultsDeep(options, {
+        cell: {
+          width: 10,
+          height: 10,
+          color: "summer",
+        },
+        font: {
+          size: 10,
+          weight: "normal",
+        },
+        padding: [20, 20, 20, 20],
+        needTopBar: false,
+        needRightBar: false,
+        needColorBar: true,
+      } as DeepRequired<Options>),
+    [options]
+  );
 
   const common = useMemo(() => {
     const all = _.flattenDeep(data);
@@ -65,34 +69,30 @@ export default function Heatmap(props: HeatmapProps) {
 
   // 画布配置
   const pixiOptions = useMemo(() => {
-    const defaultPadding = 20;
     return {
       stage: {
         width:
-          (options.padding?.[3] ?? defaultPadding) +
-          (options.padding?.[1] ?? defaultPadding) +
-          (options.needRightBar
-            ? (common.colsNum + 1) * options.cell.width + 10
-            : common.colsNum * options.cell.width),
+          defaultOptions.padding[3] +
+          defaultOptions.padding[1] +
+          (defaultOptions.needRightBar
+            ? (common.colsNum + 1) * defaultOptions.cell.width + 10
+            : common.colsNum * defaultOptions.cell.width),
         height:
-          (options.padding?.[0] ?? defaultPadding) +
-          (options.padding?.[2] ?? defaultPadding) +
-          (options.needTopBar
-            ? (common.rowsNum + 1) * options.cell.height + 10
-            : common.rowsNum * options.cell.height),
+          defaultOptions.padding[0] +
+          defaultOptions.padding[2] +
+          (defaultOptions.needTopBar
+            ? (common.rowsNum + 1) * defaultOptions.cell.height + 10
+            : common.rowsNum * defaultOptions.cell.height),
       },
       // 坐标原点
-      paintOrigin: [
-        options.padding?.[3] ?? defaultPadding,
-        options.padding?.[0] ?? defaultPadding,
-      ],
+      paintOrigin: [defaultOptions.padding[3], defaultOptions.padding[0]],
     };
-  }, [common, options]);
+  }, [common, defaultOptions]);
 
   // 颜色棒
   const colors = useMemo(() => {
     return colormap({
-      colormap: "summer",
+      colormap: defaultOptions.cell.color,
       nshades: 100,
       format: "hex",
       alpha: 1,
@@ -103,11 +103,11 @@ export default function Heatmap(props: HeatmapProps) {
   const textStyle = useMemo(
     () =>
       new PIXI.TextStyle({
-        fontFamily: "Arial",
-        fontSize: options.fontSize ?? 10,
+        fontFamily: defaultOptions.font.weight as any,
+        fontSize: defaultOptions.font.size as any,
         // fontWeight: 'bold',
       }),
-    [options]
+    [defaultOptions]
   );
 
   // 绘制一个单元格
@@ -115,9 +115,14 @@ export default function Heatmap(props: HeatmapProps) {
     (g: any, pos: [number, number], fillColor: string) => {
       g.lineStyle(1);
       g.beginFill(fillColor, 1);
-      g.drawRect(pos[0], pos[1], options.cell.width, options.cell.height);
+      g.drawRect(
+        pos[0],
+        pos[1],
+        defaultOptions.cell.width,
+        defaultOptions.cell.height
+      );
     },
-    [options]
+    [defaultOptions]
   );
   // 绘制
   const draw = useCallback(
@@ -128,8 +133,8 @@ export default function Heatmap(props: HeatmapProps) {
           const value = data[i][j];
           const [x, y] = [
             pixiOptions.paintOrigin[0],
-            options.needTopBar
-              ? pixiOptions.paintOrigin[1] + options.cell.height + 10
+            defaultOptions.needTopBar
+              ? pixiOptions.paintOrigin[1] + defaultOptions.cell.height + 10
               : pixiOptions.paintOrigin[1],
           ];
           const color =
@@ -142,12 +147,15 @@ export default function Heatmap(props: HeatmapProps) {
             ];
           drawCell(
             g,
-            [x + j * options.cell.width, y + i * options.cell.height],
+            [
+              x + j * defaultOptions.cell.width,
+              y + i * defaultOptions.cell.height,
+            ],
             color
           );
         }
       }
-      if (options.needTopBar) {
+      if (defaultOptions.needTopBar) {
         const [x, y] = [pixiOptions.paintOrigin[0], pixiOptions.paintOrigin[1]];
         const arr = [];
         for (let j = 0; j < common.colsNum; j++) {
@@ -164,10 +172,10 @@ export default function Heatmap(props: HeatmapProps) {
                 splits: colors.length,
               })
             ];
-          drawCell(g, [x + j * options.cell.width, y], color);
+          drawCell(g, [x + j * defaultOptions.cell.width, y], color);
         }
       }
-      if (options.needRightBar) {
+      if (defaultOptions.needRightBar) {
         const [x, y] = [pixiOptions.paintOrigin[0], pixiOptions.paintOrigin[1]];
         const arr = [];
         for (let i = 0; i < common.rowsNum; i++) {
@@ -187,10 +195,12 @@ export default function Heatmap(props: HeatmapProps) {
           drawCell(
             g,
             [
-              x + common.colsNum * options.cell.width + 10,
+              x + common.colsNum * defaultOptions.cell.width + 10,
               y +
-                (options.needTopBar ? options.cell.height + 10 : 0) +
-                i * options.cell.height,
+                (defaultOptions.needTopBar
+                  ? defaultOptions.cell.height + 10
+                  : 0) +
+                i * defaultOptions.cell.height,
             ],
             color
           );
@@ -198,7 +208,7 @@ export default function Heatmap(props: HeatmapProps) {
       }
       g.endFill();
     },
-    [data, common, pixiOptions, options, colors, drawCell]
+    [data, common, pixiOptions, defaultOptions, colors, drawCell]
   );
   // 绘制坐标刻度
   const drawAxisTexts = useCallback(
@@ -210,8 +220,8 @@ export default function Heatmap(props: HeatmapProps) {
           text.x = pixiOptions.paintOrigin[0] - 10;
           text.y =
             pixiOptions.paintOrigin[1] +
-            options.cell.height * (ys.length - i - 1) +
-            (options.needTopBar ? options.cell.height + 10 : 0);
+            defaultOptions.cell.height * (ys.length - i - 1) +
+            (defaultOptions.needTopBar ? defaultOptions.cell.height + 10 : 0);
           app.stage.addChild(text);
         }
       }
@@ -221,38 +231,38 @@ export default function Heatmap(props: HeatmapProps) {
           text.anchor.set(0.5, 0);
           text.x =
             pixiOptions.paintOrigin[0] +
-            options.cell.width * i +
-            options.cell.width / 2;
+            defaultOptions.cell.width * i +
+            defaultOptions.cell.width / 2;
           text.y =
             pixiOptions.paintOrigin[1] +
-            options.cell.height * ys.length +
-            (options.needTopBar ? options.cell.height + 10 : 0) +
+            defaultOptions.cell.height * ys.length +
+            (defaultOptions.needTopBar ? defaultOptions.cell.height + 10 : 0) +
             10;
           app.stage.addChild(text);
         }
       }
     },
-    [xs, ys, pixiOptions, options, textStyle]
+    [xs, ys, pixiOptions, defaultOptions, textStyle]
   );
 
   // 绘制图例
   const drawColorBar = useCallback(
     (app: PIXI.Application<PIXI.ICanvas>) => {
-      if (options.needLegend) {
-        const height = options.cell.height * common.rowsNum;
-        const width = options.cell.width;
+      if (defaultOptions.needColorBar) {
+        const height = defaultOptions.cell.height * common.rowsNum;
+        const width = defaultOptions.cell.width;
         const grd = createGradient(width, height, colors);
         const sprite = new PIXI.Sprite(grd);
         sprite.anchor.set(0, 1);
         const pos = {
           y:
             pixiOptions.paintOrigin[1] +
-            common.rowsNum * options.cell.height +
-            (options.needTopBar ? options.cell.height + 10 : 0),
+            common.rowsNum * defaultOptions.cell.height +
+            (defaultOptions.needTopBar ? defaultOptions.cell.height + 10 : 0),
           x:
             pixiOptions.paintOrigin[0] +
-            common.colsNum * options.cell.width +
-            (options.needRightBar ? options.cell.width + 10 : 0) +
+            common.colsNum * defaultOptions.cell.width +
+            (defaultOptions.needRightBar ? defaultOptions.cell.width + 10 : 0) +
             10,
         };
         sprite.position.set(pos.x, pos.y);
@@ -265,7 +275,7 @@ export default function Heatmap(props: HeatmapProps) {
           textStyle
         );
         minText.anchor.set(0.5, 0);
-        minText.position.set(pos.x + options.cell.width / 2, pos.y + 10);
+        minText.position.set(pos.x + defaultOptions.cell.width / 2, pos.y + 10);
         app.stage.addChild(minText);
 
         const maxText = new PIXI.Text(
@@ -274,13 +284,13 @@ export default function Heatmap(props: HeatmapProps) {
         );
         maxText.anchor.set(0.5, 1);
         maxText.position.set(
-          pos.x + options.cell.width / 2,
+          pos.x + defaultOptions.cell.width / 2,
           pos.y - height - 5
         );
         app.stage.addChild(maxText);
       }
     },
-    [options, common, colors, pixiOptions, textStyle]
+    [defaultOptions, common, colors, pixiOptions, textStyle]
   );
 
   const ref = useRef<HTMLDivElement>(null!);
