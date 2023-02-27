@@ -103,9 +103,8 @@ export default function Heatmap(props: HeatmapProps) {
   const textStyle = useMemo(
     () =>
       new PIXI.TextStyle({
-        fontFamily: defaultOptions.font.weight as any,
+        fontWeight: defaultOptions.font.weight as any,
         fontSize: defaultOptions.font.size as any,
-        // fontWeight: 'bold',
       }),
     [defaultOptions]
   );

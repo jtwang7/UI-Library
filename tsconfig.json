@@ -19,9 +19,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "rootDir": ".",
     "declaration": true,
-    "declarationDir": "./build/types"
+    "declarationDir": "build/types"
   },
   "include": [
     "src"
