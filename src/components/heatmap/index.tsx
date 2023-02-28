@@ -44,6 +44,10 @@ export default function Heatmap(props: HeatmapProps) {
           width: 10,
           height: 10,
           color: "summer",
+          border: {
+            color: "#111",
+            size: 1,
+          },
         },
         font: {
           size: 10,
@@ -112,7 +116,10 @@ export default function Heatmap(props: HeatmapProps) {
   // 绘制一个单元格
   const drawCell = useCallback(
     (g: any, pos: [number, number], fillColor: string) => {
-      g.lineStyle(1);
+      g.lineStyle(
+        defaultOptions.cell.border.size,
+        defaultOptions.cell.border.color
+      );
       g.beginFill(fillColor, 1);
       g.drawRect(
         pos[0],

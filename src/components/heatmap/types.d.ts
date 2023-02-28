@@ -10,6 +10,10 @@ type Cell = {
         index: number;
         rgb: [number, number, number] | [number, number, number, number];
       }>;
+  border: {
+    size: number;
+    color: string;
+  }
 };
 type FontStyle = {
   size: React.CSSProperties["fontSize"];
