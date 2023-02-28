@@ -27,6 +27,7 @@ type Options = {
   needTopBar: boolean;
   needRightBar: boolean;
   needColorBar: boolean;
+  forceCanvas: boolean;
 };
 
 type HeatmapProps = {

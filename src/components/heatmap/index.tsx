@@ -57,6 +57,7 @@ export default function Heatmap(props: HeatmapProps) {
         needTopBar: false,
         needRightBar: false,
         needColorBar: true,
+        forceCanvas: false,
       } as DeepRequired<Options>),
     [options]
   );
@@ -101,7 +102,7 @@ export default function Heatmap(props: HeatmapProps) {
       format: "hex",
       alpha: 1,
     }).reverse();
-  }, []);
+  }, [defaultOptions]);
 
   // pixi.js 字体样式
   const textStyle = useMemo(
@@ -306,7 +307,7 @@ export default function Heatmap(props: HeatmapProps) {
       height: pixiOptions.stage.height,
       backgroundColor: 0xffffff,
       // preserveDrawingBuffer: true, // 开启 webgl 缓冲区保存
-      forceCanvas: true, // only available in pixi.js-legacy
+      forceCanvas: defaultOptions.forceCanvas, // only available in pixi.js-legacy
       resolution: 2,
       autoDensity: true,
     });
@@ -323,7 +324,7 @@ export default function Heatmap(props: HeatmapProps) {
     return () => {
       app.destroy(true, true);
     };
-  }, []);
+  }, [pixiOptions, defaultOptions, draw, drawAxisTexts, drawColorBar]);
 
   return <div ref={ref}></div>;
 }
