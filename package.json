@@ -1,6 +1,6 @@
 {
   "name": "ui-library-tian",
-  "version": "0.1.9",
+  "version": "0.2.1",
   "main": "build/index.js",
   "module": "build/index.esm.js",
   "files": [
