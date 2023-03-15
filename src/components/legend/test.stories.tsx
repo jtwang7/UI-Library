@@ -12,9 +12,8 @@ const COLORS = [
   "#9661BC",
   "#F6903D",
   "#008685",
-  "#F08BB4",
 ];
-const TEXTS = ["a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10"];
+const TEXTS = ["a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9"];
 
 //👇 This default export determines where your story goes in the story list
 export default {
@@ -36,12 +35,6 @@ TestStory.args = {
   /*👇 The args you need here will depend on your component */
   texts: TEXTS,
   colors: COLORS,
-  width: 150,
-  height: 30,
-  direction: 'column',
-  font: {
-    size: 15,
-    weight: "normal",
-    family: "sans-serif",
-  },
+  width: 100,
+  height: 400,
 };

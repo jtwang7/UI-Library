@@ -1,31 +1,41 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import _ from "lodash";
 import * as PIXI from "pixi.js-legacy";
+import { DeepRequired } from "../../common";
 
 type Font = {
-  size?: React.CSSProperties["fontSize"];
-  weight?: React.CSSProperties["fontWeight"];
-  family?: React.CSSProperties["fontFamily"];
+  size: number;
+  weight: string | number;
+  family: string;
 };
 type LegendItemProps = {
   width: number;
   height: number;
-  color: React.CSSProperties["color"];
+  stageWidth: number;
+  color: string;
   text: string;
-  font: Font;
+  font?: Partial<Font>;
 };
-function LegendItem(legendProps: LegendItemProps) {
-  const props: LegendItemProps = legendProps;
+type LegendProps = {
+  width: number;
+  height: number;
+  texts: (number | string)[];
+  colors: string[];
+  style?: any;
+  padding?: [number, number, number, number];
+  direction?: "row" | "column";
+  item?: Partial<LegendItemProps>;
+};
 
-  const PADDING = 10;
-  const ORIGIN = [PADDING, PADDING];
-  const rectHeight = props.height - PADDING * 2;
-  const rectWidth = (5 / 3) * rectHeight;
+function LegendItem(props: LegendItemProps) {
+  const ORIGIN = [0, 0];
+  const rectHeight = props.height;
+  const rectWidth = props.width;
 
   const ref = useRef<HTMLDivElement>(null!);
   useEffect(() => {
     const app = new PIXI.Application({
-      width: props.width,
+      width: props.stageWidth,
       height: props.height,
       backgroundColor: 0xffffff,
       forceCanvas: true,
@@ -60,44 +70,53 @@ function LegendItem(legendProps: LegendItemProps) {
   return <div ref={ref}></div>;
 }
 
-type LegendProps = {
-  texts: (number | string)[];
-  colors: React.CSSProperties["color"][];
-  direction?: "row" | "column";
-  font?: Font;
-} & Pick<LegendItemProps, "width" | "height">;
 export default function Legend(legendProps: LegendProps) {
-  const props = useMemo(
+  const p = useMemo(() => _.cloneDeep(legendProps), [legendProps]);
+  const props = useMemo<DeepRequired<LegendProps>>(
     () =>
-      _.defaultsDeep(legendProps, {
+      _.defaultsDeep(p, {
         direction: "column",
-        font: {
-          size: 20,
-          weight: "normal",
-          family: "sans-serif",
+        padding: [10, 10, 10, 10],
+        item: {
+          width: 40,
+          height: 20,
+          font: {
+            size: 20,
+            weight: "normal",
+            family: "sans-serif",
+          },
         },
-      }) as LegendProps,
-    [legendProps]
+      }),
+    [p]
   );
-  const { texts, colors, width, height, font, direction } = props;
-  const pairs = _.zipObject<React.CSSProperties["color"]>(texts, colors);
+
+  const pairs = _.zipObject(props.texts, props.colors);
 
   return (
     <div
       style={{
+        width: props.width,
+        height: props.height,
+        backgroundColor: "#fff",
+        border: "1px solid #111",
+        borderRadius: "5px",
         display: "flex",
-        flexDirection: direction,
+        flexDirection: props.direction,
         alignItems: "center",
+        justifyContent: "space-between",
+        padding: `${props.padding[0]}px ${props.padding[1]}px ${props.padding[2]}px ${props.padding[3]}px`,
+        ...props.style
       }}
     >
       {Object.entries(pairs).map(([text, color]) => {
         return (
           <LegendItem
-            width={width}
-            height={height}
+            width={props.item!.width}
+            height={props.item!.height}
+            stageWidth={props.width - props.padding[1] - props.padding[3]}
             color={color}
             text={text}
-            font={font!}
+            font={props.item!.font as Font}
           />
         );
       })}

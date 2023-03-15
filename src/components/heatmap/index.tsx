@@ -346,6 +346,7 @@ export default function Heatmap(props: HeatmapProps) {
       forceCanvas: defaultOptions.forceCanvas, // only available in pixi.js-legacy
       resolution: 2,
       autoDensity: true,
+      backgroundAlpha: 0, // 背景透明度-完全透明
     });
 
     const graphic = new PIXI.Graphics();
