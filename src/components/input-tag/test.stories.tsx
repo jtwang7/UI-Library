@@ -11,9 +11,13 @@ export default meta;
 type Story = StoryObj<typeof InputTag>;
 
 export const Primary: Story = {
-  render: () => <InputTag />,
+  render: () => <InputTag width={500} />,
 };
 
 export const MaxCount: Story = {
-  render: () => <InputTag maxCount={3} style={{ marginTop: 30 }} />,
+  render: () => <InputTag maxCount={3} width={500} style={{ marginTop: 30 }} />,
+};
+
+export const MaxWidth: Story = {
+  render: () => <InputTag autoRest width={500} />,
 };

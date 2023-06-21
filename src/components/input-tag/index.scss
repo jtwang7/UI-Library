@@ -1,0 +1,17 @@
+.tag-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid gray;
+  padding: 0px 5px;
+  flex-flow: wrap;
+}
+
+.tag-hidden {
+  position: absolute;
+  visibility: hidden;
+}
+
+.tag-visible {
+  position: relative;
+  visibility: visible;
+}
