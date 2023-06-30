@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import InputTag from "./index";
 import React from "react";
+import { Popover, Tooltip } from "antd";
 
 const meta: Meta<typeof InputTag> = {
   title: "InputTag",
@@ -15,9 +16,19 @@ export const Primary: Story = {
 };
 
 export const MaxCount: Story = {
-  render: () => <InputTag maxCount={3} width={500} style={{ marginTop: 30 }} />,
+  args: {
+    maxCount: 3,
+    width: 500,
+    wrapper: (Tags) => <Popover content={Tags} />,
+  },
 };
 
 export const MaxWidth: Story = {
-  render: () => <InputTag autoRest width={500} />,
+  render: () => (
+    <InputTag
+      autoRest
+      width={500}
+      wrapper={(Tags) => <Tooltip color="#fff" title={Tags} />}
+    />
+  ),
 };
