@@ -19,6 +19,7 @@ type InputTagProps = {
   style?: React.CSSProperties;
   width?: number;
   maxCount?: number; // 最多tag展示数
+  maxWidth?: number;
   autoRest?: boolean; // 超出范围的tag自动折叠
   wrapper?: (Tags: React.ReactNode) => React.ReactElement;
 };
@@ -45,25 +46,19 @@ const InputTag: React.ForwardRefRenderFunction<any, InputTagProps> = (
     []
   );
 
-  const [tags, setTags] = useState<TagType[]>([]);
-  const [tag, setTag] = useState<string>();
-
-  const addTag = (tag: string) => {
-    if (tags.find((t) => t.value === tag)) {
-      return;
-    }
-    setTags((prev) => [...prev, { id: uuid(), value: tag }]);
-    setTag(undefined);
-  };
-  const removeTag = (tag: TagType) => {
-    setTags((prev) => prev.filter((pt) => pt.id !== tag.id));
-  };
-  const clearTags = () => {
-    setTags([]);
-  };
-
   // 宽度计算逻辑
-  const [getRefs, index] = useTags(tags, props.width, props.maxCount);
+  const {
+    tagsOnShow,
+    tagsOnHidden,
+    getInputProps,
+    getTagsOnShowProps,
+    getTagsOnHiddenProps,
+    getClearButtonProps,
+  } = useTags({
+    tagMargin: 10,
+    maxWidth: props.maxWidth,
+    maxCount: props.maxCount,
+  });
 
   return (
     <div
@@ -75,43 +70,25 @@ const InputTag: React.ForwardRefRenderFunction<any, InputTagProps> = (
       }}
     >
       {/* tag 展示部分 */}
-      {tags.slice(0, index).map((tag) => (
-        <Tag
-          key={uuid()}
-          ref={getRefs}
-          bordered
-          closable
-          onClose={(e) => {
-            e.preventDefault();
-            removeTag(tag);
-          }}
-        >
-          {tag.value}
+      {tagsOnShow.map((tag, idx) => (
+        <Tag bordered closable {...getTagsOnShowProps(tag, idx)}>
+          {tag}
         </Tag>
       ))}
       {/* tag 隐藏部分 */}
       {/* 此处用 React.cloneElement 设置插槽，可传入 Popover，Tooltip 等组件 */}
-      {props.wrapper && tags.slice(index).length
+      {props.wrapper && tagsOnHidden.length
         ? React.cloneElement(
             props.wrapper(
-              tags.slice(index).map((tag) => (
-                <Tag
-                  key={uuid()}
-                  ref={getRefs}
-                  bordered
-                  closable
-                  onClose={(e) => {
-                    e.preventDefault();
-                    removeTag(tag);
-                  }}
-                >
-                  {tag.value}
+              tagsOnHidden.map((tag, idx) => (
+                <Tag bordered closable {...getTagsOnHiddenProps(tag, idx)}>
+                  {tag}
                 </Tag>
               ))
             )!,
             {
               children: (
-                <Tag bordered closable={false}>{`+${tags.length - index}`}</Tag>
+                <Tag bordered closable={false}>{`+${tagsOnHidden.length}`}</Tag>
               ),
             }
           )
@@ -121,21 +98,12 @@ const InputTag: React.ForwardRefRenderFunction<any, InputTagProps> = (
         placeholder="请输入..."
         style={{ minWidth: MIN_INPUT_WIDTH, flex: "1 1" }}
         bordered={false}
-        value={tag}
-        onChange={(e) => {
-          setTag(e.target.value);
-        }}
-        onPressEnter={() => {
-          tag && addTag(tag);
-        }}
+        {...getInputProps()}
       />
       <CloseSquareOutlined
         rev={undefined}
         style={{ marginLeft: "auto" }}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          clearTags();
-        }}
+        {...getClearButtonProps()}
       />
     </div>
   );
