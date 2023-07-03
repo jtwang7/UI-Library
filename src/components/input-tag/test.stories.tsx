@@ -26,8 +26,8 @@ export const MaxCount: Story = {
 export const MaxWidth: Story = {
   render: () => (
     <InputTag
-      autoRest
       width={500}
+      maxWidth={200}
       wrapper={(Tags) => <Tooltip color="#fff" title={Tags} />}
     />
   ),

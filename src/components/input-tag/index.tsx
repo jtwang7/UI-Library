@@ -1,17 +1,9 @@
-import React, {
-  useImperativeHandle,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { Input, Tag, InputRef, Popover } from "antd";
-import { v4 as uuid } from "uuid";
+import React, { useImperativeHandle, useRef } from "react";
+import { Input, Tag, InputRef } from "antd";
 import _ from "lodash";
 import { CloseSquareOutlined } from "@ant-design/icons";
 import "antd/dist/reset.css";
 import "./index.scss";
-import cs from "classnames";
 import { useTags } from "./useTags";
 
 export type TagType = { id: string; value: string };
@@ -20,7 +12,6 @@ type InputTagProps = {
   width?: number;
   maxCount?: number; // 最多tag展示数
   maxWidth?: number;
-  autoRest?: boolean; // 超出范围的tag自动折叠
   wrapper?: (Tags: React.ReactNode) => React.ReactElement;
 };
 const InputTag: React.ForwardRefRenderFunction<any, InputTagProps> = (
